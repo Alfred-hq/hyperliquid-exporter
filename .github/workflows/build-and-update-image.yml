@@ -11,7 +11,7 @@ env:
   REGISTRY: ghcr.io
   USERNAME: ${{secrets.GHCR_USERNAME}}
   PASSWORD: ${{ secrets.GHCR_PASSWORD}}
-  REGISTRY_REPOSITORY: hyperliquid-node
+  REGISTRY_REPOSITORY: hyperliquid-node-metric-exporter
   COMMIT_HASH: $(git rev-parse --short=7 HEAD)
 
 
