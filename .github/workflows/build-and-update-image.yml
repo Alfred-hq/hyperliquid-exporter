@@ -53,5 +53,3 @@ jobs:
           # Push both tags
           docker push $image_name:$commit_hash
           docker push $image_name:latest
-      
-          done
