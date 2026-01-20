@@ -9,6 +9,8 @@ on:  # yamllint disable-line rule:truthy
 
 env:
   REGISTRY: ghcr.io
+  USERNAME: ${{secrets.GHCR_USERNAME}}
+  PASSWORD: ${{ secrets.GHCR_PASSWORD}}
   USERNAME: ${{ secrets.GHCR_USERNAME }}
   PASSWORD : ${{ secrets.GHCR_PASSWORD}}
   REGISTRY_REPOSITORY: hyperliquid-node
