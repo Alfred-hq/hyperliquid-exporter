@@ -53,44 +53,5 @@ jobs:
           # Push both tags
           docker push $image_name:$commit_hash
           docker push $image_name:latest
-
-      - id: 'auth_prod'
-        uses: 'google-github-actions/auth@v1'
-        with:
-          token_format: 'id_token'
-          workload_identity_provider: 'projects/591172027681/locations/global/workloadIdentityPools/github-action-pool/providers/gh-action-provider'
-          service_account: 'nomad-ui-invoker@chainlake-master-production.iam.gserviceaccount.com'
-          id_token_audience: '591172027681-tslrm07jssi0gmnju56s9m97e1dollgb.apps.googleusercontent.com'
-          id_token_include_email: true # optional
-          create_credentials_file: 'false'          
-
-      - name: Restart Nomad Job
-        run: |
-          job_names=("hyperliquid")
-          tasks=("hl-exporter")
-          
-          for i in "${!job_names[@]}"; do
-            job_name="${job_names[$i]}"
-          
-            json_resp=$(curl --header "Authorization: Bearer ${{ steps.auth_prod.outputs.id_token }}" --location --request GET "https://nomad-ui.chainlake.dev/v1/job/${job_name}")
-
-            updated_json_resp=$(echo "$json_resp" | jq --argjson tasks "$(printf '%s\n' "${tasks[@]}" | jq -R . | jq -s .)" --arg new_image "$REGISTRY/alfred-hq/$REGISTRY_REPOSITORY:${{ env.COMMIT_HASH }}" '
-              .TaskGroups |= map(
-                .Tasks |= map(
-                  if (.Name | IN($tasks[])) then
-                    .Config.image = $new_image
-                  else
-                    .
-                  end
-                )
-              )
-            ')
-            
-            job=$(mktemp)
-            echo "{\"Job\": $updated_json_resp}" > "$job"
-
-            echo "\n Starting Job ${job_name}"
-            curl --header "Authorization: Bearer ${{ steps.auth_prod.outputs.id_token }}" --location --request POST "https://nomad-ui.chainlake.dev/v1/job/${job_name}" --data "@$job"
-            rm "$job"
       
           done
